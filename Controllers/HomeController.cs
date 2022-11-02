@@ -14,8 +14,8 @@ namespace WizardDashboard.Controllers
         private static OleDbCommand command;
         private static OleDbDataReader reader;
         private static OleDbConnection connection = new OleDbConnection("Provider=SQLOLEDB;" +
-                "Data Source=MAJICKVPS\\SQLEXPRESS;" +
-                "Initial Catalog=Wizard;" +
+                "Data Source=SERVER\\SQLEXPRESS;" +
+                "Initial Catalog=NAME;" +
                 "Integrated Security=SSPI;");
         [HttpGet]
         public ActionResult Index(string user_id = "")
