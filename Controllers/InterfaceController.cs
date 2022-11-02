@@ -10,14 +10,14 @@ namespace WizardDashboard.Controllers
 {
     public class InterfaceController : Controller
     {
-        private const string client_id = "694822276356374548";
-        private const string client_secret = "d_9lScymp2JpfIMWOztOq4g6rdpL1-b6";
-        private const string token = "Njk0ODIyMjc2MzU2Mzc0NTQ4.XrR1qg.0auItnjBzbK99Tgk_oK-TMsSOIk";
+        private const string client_id = "";
+        private const string client_secret = "";
+        private const string token = "";
         private static OleDbCommand command;
         private static OleDbDataReader reader;
         private static OleDbConnection connection = new OleDbConnection("Provider=SQLOLEDB;" +
-                "Data Source=MAJICKVPS\\SQLEXPRESS;" +
-                "Initial Catalog=Wizard;" +
+                "Data Source=SERVER\\SQLEXPRESS;" +
+                "Initial Catalog=NAME;" +
                 "Integrated Security=SSPI;");
 
         [HttpGet]
