@@ -1,0 +1,82 @@
+﻿.majick-button {
+    cursor: pointer;
+    box-sizing: border-box;
+    background-position: 0 100%;
+    background-size: 200% 200%;
+    outline: 0;
+    display: -webkit-inline-box;
+    display: inline-flex;
+    padding: 0 1.2rem;
+    height: 42px;
+    border-radius: 4px;
+    border: solid 1px;
+    font-weight: bold;
+    font-size: 16px;
+    -webkit-transition: all 120ms;
+    transition: all 120ms;
+}
+
+    .majick-button:active {
+        background-position: 0 0%;
+    }
+
+    .majick-button.brand {
+        background-color: #3db588;
+        background-image: -webkit-gradient(linear, left top, left bottom, from(#38a67d), color-stop(50%, #3db588), to(#38a67d));
+        background-image: linear-gradient(-180deg, #38a67d 0%, #3db588 50%, #38a67d 100%);
+        box-shadow: inset 0 -1px 0 0 #23694f;
+        border-color: #23694f;
+        color: #ffffff;
+    }
+
+        .majick-button.brand:active {
+            box-shadow: inset 0 2px 0px #2a7c5d;
+        }
+
+    .majick-button.secondary {
+        background-color: #ac5ee0;
+        background-image: -webkit-gradient(linear, left top, left bottom, from(#a34ddd), color-stop(50%, #ac5ee0), to(#a34ddd));
+        background-image: linear-gradient(-180deg, #a34ddd 0%, #ac5ee0 50%, #a34ddd 100%);
+        box-shadow: inset 0 -1px 0 0 #7b23b5;
+        border-color: #7b23b5;
+        color: #ffffff;
+    }
+
+        .majick-button.secondary:active {
+            box-shadow: inset 0 2px 0px #8927cb;
+        }
+
+    .majick-button.destructive {
+        background-color: #f04747;
+        background-image: -webkit-gradient(linear, left top, left bottom, from(#ee3434), color-stop(50%, #f04747), to(#ee3434));
+        background-image: linear-gradient(-180deg, #ee3434 0%, #f04747 50%, #ee3434 100%);
+        box-shadow: inset 0 -1px 0 0 #c11010;
+        border-color: #c11010;
+        color: #ffffff;
+    }
+
+        .majick-button.destructive:active {
+            box-shadow: inset 0 2px 0px #d91212;
+        }
+
+    .majick-button:not(.brand):not(.secondary):not(.destructive) {
+        background-color: #ffffff;
+        background-image: -webkit-gradient(linear, left top, left bottom, from(whitesmoke), color-stop(50%, #ffffff), to(whitesmoke));
+        background-image: linear-gradient(-180deg, whitesmoke 0%, #ffffff 50%, whitesmoke 100%);
+        box-shadow: inset 0 -1px 0 0 #cccccc;
+        border-color: #cccccc;
+        color: #464c4f;
+    }
+
+        .majick-button:not(.brand):not(.secondary):not(.destructive):active {
+            box-shadow: inset 0 2px 0px #d9d9d9;
+        }
+
+    .majick-button:disabled {
+        background-image: none;
+        background-color: rgba(0, 0, 0, 0.12) !important;
+        border-color: rgba(0, 0, 0, 0.12) !important;
+        color: rgba(0, 0, 0, 0.34) !important;
+        cursor: not-allowed;
+        box-shadow: none !important;
+    }

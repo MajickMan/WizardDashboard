@@ -1,0 +1,32 @@
+﻿@using MajickSharp.Discord
+@using WizardDashboard.Models
+@model DashboardUser
+@{
+    ViewBag.Title = "Wizard Bot - Select a Server";
+}
+
+<!--This is the Server Selction Page for Wizard-->
+    <div class="server-select-container">
+        @foreach (ServerData server in Model.Servers.Values)
+        {
+            string icon_url = "https://cdn.discordapp.com/icons/" + server.ID + "/" + server.Icon + ".png";
+            if (server.IsOwner)
+            {
+                <div class="wizard-server">
+                    <span><img src=@icon_url class="server-nav-image"/> @server.Name</span><@Html.ActionLink("Dashboard", "Servers", new { server_id = server.ID })>
+                </div><br />
+            }
+            else if (server.NamedPermissions.Contains(DiscordPermission.ADMINISTRATOR))
+            {
+                <div class="wizard-server">
+                    <span><img src=@icon_url class="server-nav-image"/> @server.Name</span><@Html.ActionLink("Dashboard", "Servers", new { server_id = server.ID })>
+                </div>
+            }
+            else if (server.HasDashboardAccess)
+            {
+                <div class="wizard-server">
+                    <span><img src=@icon_url class="server-nav-image"/> @server.Name</span><@Html.ActionLink("Dashboard", "Servers", new { server_id = server.ID })>
+                </div>
+            }
+        }
+    </div>

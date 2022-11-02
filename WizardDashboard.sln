@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WizardDashboard", "WizardDashboard.csproj", "{D515E1FD-3CFA-4B5F-8E5E-80CDEA2F5EFA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D515E1FD-3CFA-4B5F-8E5E-80CDEA2F5EFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D515E1FD-3CFA-4B5F-8E5E-80CDEA2F5EFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D515E1FD-3CFA-4B5F-8E5E-80CDEA2F5EFA}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{D515E1FD-3CFA-4B5F-8E5E-80CDEA2F5EFA}.Release|Any CPU.Build.0 = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {19E3E463-AF6D-4CD7-9D1F-3566764F783F}
+	EndGlobalSection
+EndGlobal

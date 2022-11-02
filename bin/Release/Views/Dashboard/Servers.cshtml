@@ -1,0 +1,597 @@
+﻿@using MajickSharp.Discord
+@using WizardDashboard.Models
+@model DashboardServer
+@{
+    ViewBag.Title = "Set up Wizard for your server!";
+}
+
+<!--This is the main page for a Server's Configuration-->
+<div id="WIZARD_DASHBAORD" class="wizard-dashboard-container">
+    @if (Model.ID != "NOSERVER")
+    {
+        <div id="role-select-popup-base" style="display:none" data-string="" data-container="">
+            @foreach (DashboardRole role in Model.Roles.Values)
+            {
+                string role_id = Model.ID + "_" + role.ID + "_POPUP_ROLE";
+                string color = "color:" + role.Color;
+                string position = "order:" + role.Position.ToString();
+                string style = color + "; " + position;
+                <span display="block" id=@role_id class="dashboard-role" style="@style">@role.Name</span>
+            }
+        </div>
+        <div id="role-selected-list" style="display:none" data-string="">
+            @foreach (DashboardRole role in Model.Roles.Values)
+            {
+                string role_clone_id = Model.ID + "_" + role.ID + "_ROLE_BASE";
+                string color = "color:" + role.Color;
+                string position = "order:-" + role.Position.ToString();
+                string style = color + "; " + position + ";";
+                string delete_id = "PLUGIN_TYPE_ROLE_DELETE_" + role.ID + "_CLONE";
+                string btn_color = "background-color:" + role.Color;
+                <div id=@role_clone_id class="current-role" style="@style"><button id=@delete_id type="button" class="role-remove-button" style=@btn_color data-string="">X</button><span class="role-name">@Model.Roles[role.ID].Name</span></div>
+            }
+        </div>
+        <div id="role-select-popup-clone"></div>
+        <div id="ROLEGROUP_SERVER_BASEROLE" class="role-group-container" style="display:none">
+            <div id="ROLEGROUP_BASE_SERVER_BASEROLE" class="current-role"><span class="role-name">{role.name}</span></div>
+            <div id="ROLEGROUP_GROUPED_ROLE_ADD_BUTTON_CONTAINER_SERVER_BASEROLE" class="role-add-button-container-column">
+                <button id="ROLEGROUP_GROUPED_ROLE_ADD_BUTTON_SERVER_BASEROLE" class="role-add-button-special" type="button" data-roles="" data-string="" data-container="ROLEGROUP_GROUPED_ROLE_ADD_BUTTON_CONTAINER_SERVER_BASEROLE">Grouped Roles +</button>
+            </div>
+            <div id="ROLEGROUP_REJECTED_ROLE_ADD_BUTTON_CONTAINER_SERVER_BASEROLE" class="role-add-button-container-column">
+                <button id="ROLEGROUP_REJECTED_ROLE_ADD_BUTTON_SERVER_BASEROLE" class="role-add-button-special" type="button" data-roles="" data-string="" data-container="ROLEGROUP_REJECTED_ROLE_ADD_BUTTON_CONTAINER_SERVER_BASEROLE">Rejected Roles +</button>
+            </div>
+            <div id="ROLEGROUP_REQUIRED_ROLE_ADD_BUTTON_CONTAINER_SERVER_BASEROLE" class="role-add-button-container-column">
+                <button id="ROLEGROUP_REQUIRED_ROLE_ADD_BUTTON_SERVER_BASEROLE" class="role-add-button-special" type="button" data-roles="" data-string="" data-container="ROLEGROUP_REQUIRED_ROLE_ADD_BUTTON_CONTAINER_SERVER_BASEROLE">Required Roles +</button>
+            </div>
+            <span class="require-all">Require All: <input type="checkbox"/></span>
+        </div>
+    }
+    <div class="user-server-nav">
+        @foreach (ServerNavItem server_nav in Model.OtherServers.Values)
+        {
+            string server_nav_id = "SERVER_NAV_" + server_nav.ID;
+            string icon_url = "https://cdn.discordapp.com/icons/" + server_nav.ID + "/" + server_nav.Icon + ".png";
+            <div id=@server_nav_id class="server-nav-item"><img src=@icon_url class="server-nav-image" /></div>
+            //This is where we set the link to "refresh" the page with the new ID
+        }
+    </div>
+    <div class="plugin-tab-container">
+        @if (Model.ID.StartsWith("NO_WIZARD"))
+        {
+            //This is where I need to have the link to add the bot on a nice and shiny big ass "click me" kinda thing
+            string server_id = Model.ID.Split('%')[1];
+            string add_me_id = "BIGASS_ADD_ME_BUTTON_" + server_id;
+            string add_me_container_id = "BIGASS_ADD_ME_BUTTON_CONTAINER_" + server_id;
+             <div id=@add_me_container_id class="bigass-add-me-button-container">
+                 <buton id="BIGASS_ADD_ME_BUTTON" type="button" class="bigass-add-me-button">
+                     <span id=@add_me_id class="bigass-add-me-button-text">ADD WIZARD to @Model.Name</span>
+                 </buton>
+             </div>
+            //Redirect to Interface/Login?server_id=Model.ID
+        }
+        else {
+            if (Model.ID == "NOSERVER") 
+            {
+                <div class="plugin-tab-nav" style="text-align:center">
+                    @if (Model.OtherServers.Count > 0) {<span>Please select a server by clicking one of your server images displayed on the left</span>}
+                    else {<span>Well, uhm... It looks like you don't have permission to access the Dashboard for any of the servers you are on....</span>}
+                </div>
+                <div class="plugin-tab-content"></div>
+            }
+            else
+            {
+            <div class="plugin-tab-nav">
+                @foreach (DashboardPlugin plugin in Model.Plugins.Values)
+                {
+                    if (plugin.Name != "Role Groups")
+                    {
+                        string plugin_tab_id = "PLUGIN_NAV_" + plugin.Name.Replace(" ", "_");
+                        <div id=@plugin_tab_id class="plugin-nav-item">@plugin.Name</div>
+                    }
+                }
+            </div>
+                foreach (DashboardPlugin plugin_content in Model.Plugins.Values)
+                {
+                    string plugin_id = "PLUGIN_CONTENT_" + plugin_content.Name.Replace(" ", "_");
+                    if (plugin_content.Name == "Settings")
+                    {
+                        bool helpdesk_create_disabled = true;
+                        string settings_immunity_data = "settings_immunity_" + Model.UserID + "_";
+                        string settings_command_data = "settings_command_" + Model.UserID + "_";
+                        string settings_rejected_data = "settings_rejected_" + Model.UserID + "_";
+                        string settings_dashboard_data = "settings_dashboard_" + Model.UserID + "_";
+                        string settings_commandrole_data = "settings_commandrole_" + Model.UserID + "_";
+                        if (Model.HelpdeskChannelID == "") { helpdesk_create_disabled = false; }
+                        bool helpdesk_delete_disabled = !helpdesk_create_disabled;
+                        string prefix_id = "SETTINGS_PREFIX_" + Model.ID;
+                    <div id=@plugin_id class="plugin-tab-content" style="display:flex">
+                        <div class="plugin-content-container">
+                            <div class="plugin-info-and-actions">
+                                <div class="action-content-container">
+                                    <span class="action-content">The wizard helpdesk is a special channel that you can use to send messages for support directly to the Wizard Support server for help. Will receive responses there as well</span>
+                                </div>
+                                <div class="create-delete-button-container">
+                                    <button id="SETTINGS_HELPDESK_CREATE_BUTTON" class="channel-create-button" type="button" disabled=@helpdesk_create_disabled data-user=@Model.UserID>Create Helpdesk Channel</button>
+                                    <button id="SETTINGS_HELPDESK_DELETE_BUTTON" class="channel-delete-button" type="button" disabled=@helpdesk_delete_disabled data-user=@Model.UserID>Delete Helpdesk Channel</button>
+                                </div>
+                            </div>
+                            <div class="channel-add-container"><div class="current-channel"><span id=@prefix_id class="channel-name">Command Prefix: @Model.AccessSettings.CommandPrefix</span></div></div>
+                            <span class="text-label">Immunity Roles</span>
+                            <div id="SETTINGS_IMMUNITY_ROLE_CONTAINER" class="role-add-container">
+                                @foreach (string immunity_role in Model.AccessSettings.ImmunityRoles)
+                                {
+                                    if (immunity_role != "")
+                                    {
+                                        string color = Model.Roles[immunity_role].Color;
+                                        string position = "order:-" + Model.Roles[immunity_role].Position.ToString();
+                                        string style = "color:" + color + "; " + position;
+                                        string immunity_id = "SETTINGS_IMMUNITY_ROLE_" + immunity_role;
+                                        string delete_id = "SETTINGS_IMMUNITY_ROLE_DELETE_" + immunity_role;
+                                        string data_string = "settings_immunity_" + Model.UserID + "_" + Model.ID + "_" + immunity_role;
+                                        <div id=@immunity_id class="current-role" style="@style"><button id=@delete_id type="button" class="role-remove-button" style="background-color:@color" data-string=@data_string>X</button><span class="role-name">@Model.Roles[immunity_role].Name</span></div>
+                                    }
+                                }
+                                <button id="SETTINGS_IMMUNITY_ROLE_ADD_BUTTON" class="role-add-button" type="button" data-string=@settings_immunity_data data-container="SETTINGS_IMMUNITY_ROLE_CONTAINER">+</button>
+                            </div>
+                            <span class="text-label">Command Roles</span>
+                            <div id="SETTINGS_COMMAND_ROLE_CONTAINER" class="role-add-container">
+                                @foreach (string command_role in Model.AccessSettings.CommandRoles)
+                                {
+                                    if (command_role != "")
+                                    {
+                                        string color = Model.Roles[command_role].Color;
+                                        string position = "order:-" + Model.Roles[command_role].Position.ToString();
+                                        string style = "color:" + color + "; " + position;
+                                        string command_id = "SETTINGS_COMMAND_ROLE_" + command_role;
+                                        string delete_id = "SETTINGS_COMMAND_ROLE_DELETE_" + command_role;
+                                        string data_string = "settings_command_" + Model.UserID + "_" + Model.ID + "_" + command_role;
+                                        <div id=@command_id class="current-role" style="@style"><button id=@delete_id type="button" class="role-remove-button" style="background-color:@color" data-string=@data_string>X</button><span class="role-name">@Model.Roles[command_role].Name</span></div>
+                                    }
+                                }
+                                <button id="SETTINGS_COMMAND_ROLE_ADD_BUTTON" class="role-add-button" type="button" data-string=@settings_command_data data-container="SETTINGS_COMMAND_ROLE_CONTAINER">+</button>
+                            </div>
+                            <span class="text-label">Rejected Roles</span>
+                            <div id="SETTINGS_REJECTED_ROLE_CONTAINER" class="role-add-container">
+                                @foreach (string rejected_role in Model.AccessSettings.RejectedRoles)
+                                {
+                                    if (rejected_role != "")
+                                    {
+                                        string color = Model.Roles[rejected_role].Color;
+                                        string position = "order:-" + Model.Roles[rejected_role].Position.ToString();
+                                        string style = "color:" + color + "; " + position;
+                                        string rejected_id = "SETTINGS_REJECTED_ROLE_" + rejected_role;
+                                        string delete_id = "SETTINGS_REJECTED_ROLE_DELETE_" + rejected_role;
+                                        string data_string = "settings_rejected_" + Model.UserID + "_" + Model.ID + "_" + rejected_role;
+                                        <div id=@rejected_id class="current-role" style="@style"><button id=@delete_id type="button" class="role-remove-button" style="background-color:@color" data-string=@data_string>X</button><span class="role-name">@Model.Roles[rejected_role].Name</span></div>
+                                    }
+                                }
+                                <button id="SETTINGS_REJECTED_ROLE_ADD_BUTTON" class="role-add-button" type="button" data-string=@settings_rejected_data data-container="SETTINGS_REJECTED_ROLE_CONTAINER">+</button>
+                            </div>
+                            <span class="text-label">Dashboard Access Roles</span>
+                            <div id="SETTINGS_DASHBOARD_ROLE_CONTAINER" class="role-add-container">
+                                @foreach (string dashboard_role in Model.AccessSettings.DashboardRoles)
+                                {
+                                    if (dashboard_role != "")
+                                    {
+                                        string color = Model.Roles[dashboard_role].Color;
+                                        string position = "order:-" + Model.Roles[dashboard_role].Position.ToString();
+                                        string style = "color:" + color + "; " + position;
+                                        string dashboard_id = "SETTINGS_DASHBOARD_ROLE_" + dashboard_role;
+                                        string delete_id = "SETTINGS_DASHBOARD_ROLE_DELETE_" + dashboard_role;
+                                        string data_string = "settings_dashboard_" + Model.UserID + "_" + Model.ID + "_" + dashboard_role;
+                                        <div id=@dashboard_id class="current-role" style="@style"><button id=@delete_id type="button" class="role-remove-button" style="background-color:@color" data-string=@data_string>X</button><span class="role-name">@Model.Roles[dashboard_role].Name</span></div>
+                                    }
+                                }
+                                <button id="SETTINGS_DASHBOARD_ROLE_ADD_BUTTON" class="role-add-button" type="button" data-string=@settings_dashboard_data data-container="SETTINGS_DASHBOARD_ROLE_CONTAINER">+</button>
+                            </div>
+                            <span class="text-label">Settings Command Roles: </span>
+                            <div id="SETTINGS_COMMANDROLE_CONTAINER" class="role-add-container">
+                                @foreach (string commandrole_role in plugin_content.CommandRoles)
+                                {
+                                    if (commandrole_role != "")
+                                    {
+                                        string color = Model.Roles[commandrole_role].Color;
+                                        string position = "order:-" + Model.Roles[commandrole_role].Position.ToString();
+                                        string style = "color:" + color + "; " + position;
+                                        string settings_id = "SETTINGS_COMMANDROLE_ROLE_" + commandrole_role;
+                                        string delete_id = "SETTINGS_COMMANDROLE_ROLE_DELETE_" + commandrole_role;
+                                        string data_string = "settings_commandrole_" + Model.UserID + "_" + Model.ID + "_" + commandrole_role;
+                                        <div id=@settings_id class="current-role" style="@style"><button id=@delete_id type="button" class="role-remove-button" style="background-color:@color" data-string=@data_string>X</button><span class="role-name">@Model.Roles[commandrole_role].Name</span></div>
+                                    }
+                                }
+                                <button id="SETTINGS_COMMANDROLE_ADD_BUTTON" class="role-add-button" type="button" data-string=@settings_commandrole_data data-container="SETTINGS_COMMANDROLE_CONTAINER">+</button>
+                            </div>
+                            <span class="text-label">Settings Commands: </span>
+                            <div id="SETTINGS_COMMANDS_CONTAINER" class="plugin-command-container">
+                                @foreach (PluginCommand command in plugin_content.Commands)
+                                {
+                                    <div class="plugin-command">
+                                        <span class="command-field">@command.Name</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    }
+                    else
+                    {
+                    <div id=@plugin_id class="plugin-tab-content" style="display:none">
+                        @switch (plugin_content.Name)
+                        {
+                            case "Roles":
+                                string roles_commandrole_data = "roles_commandrole_" + Model.UserID + "_";
+                                <div class="plugin-content-container">
+                                    <div class="plugin-info-and-actions"><div class="action-content-container"><span class="action-content">These are the commands for role assignment and info</span></div></div>
+                                    <span class="text-label">Role Command Roles: </span>
+                                    <div id="ROLES_COMMANDROLE_CONTAINER" class="role-add-container">
+                                        @foreach (string commandrole_role in plugin_content.CommandRoles)
+                                        {
+                                            if (commandrole_role != "")
+                                            {
+                                                string color = Model.Roles[commandrole_role].Color;
+                                                string position = "order:-" + Model.Roles[commandrole_role].Position.ToString();
+                                                string style = "color:" + color + "; " + position;
+                                                string rolecommands_id = "ROLES_COMMANDROLE_ROLE_" + commandrole_role;
+                                                string delete_id = "ROLES_COMMANDROLE_ROLE_DELETE_" + commandrole_role;
+                                                string data_string = "roles_commandrole_" + Model.UserID + "_" + Model.ID + "_" + commandrole_role;
+                                                <div id=@rolecommands_id class="current-role" style="@style"><button id=@delete_id type="button" class="role-remove-button" style="background-color:@color" data-string=@data_string>X</button><span class="role-name">@Model.Roles[commandrole_role].Name</span></div>
+                                            }
+                                        }
+                                        <button id="RCOMMANDS_COMMANDROLE_ADD_BUTTON" class="role-add-button" type="button" data-string=@roles_commandrole_data data-container="ROLES_COMMANDROLE_CONTAINER">+</button>
+                                    </div>
+                                    <span class="text-label">Role Commands: </span>
+                                    <div id="ROLE_COMMANDS_CONTAINER" class="plugin-command-container">
+                                        @foreach (PluginCommand command in plugin_content.Commands)
+                                        {
+                                            <div class="plugin-command">
+                                                <span class="command-field">@command.Name</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                break;
+                            case "Role Groups":
+                                string unavailable_group_bases = "";
+                                <div id="ROLEGROUP_CONTENT_CONTAINER" class="role-group-content-container" style="display:none">
+                                    @foreach (string role_id in Model.Roles.Keys)
+                                    {
+                                        if (Model.RoleGroups.ContainsKey(role_id)) { unavailable_group_bases += role_id + "_"; }
+                                        if (Model.Roles[role_id].Name == "@everyone") { unavailable_group_bases += role_id + "_"; }
+                                    }
+                                    @if (unavailable_group_bases != "") { unavailable_group_bases = unavailable_group_bases.Substring(0, unavailable_group_bases.Length - 1); }
+                                    <div class="plugin-info-and-actions">
+                                        <button id="ROLEGROUP_CREATE_BUTTON" class="rolegroup-create-button" type="button" data-roles=@unavailable_group_bases>Add Role Group</button>
+                                        <div class="action-content-container"><span class="action-content">Any role but the everyone role can become a group base. Restrictions will apply to groupings</span></div>
+                                    </div>
+                                    <div id="ROLEGROUP_COLLECTION_CONTAINER" class="role-group-collection-container">
+                                        @foreach (DashboardRoleGroup role_group in Model.RoleGroups.Values)
+                                        {
+                                            string group_style = "order:-" + Model.Roles[role_group.BaseRoleID].Position.ToString();
+                                            string group_id = "ROLEGROUP_" + Model.ID + "_" + role_group.BaseRoleID;
+                                            string base_role_id = "ROLEGROUP_BASE_" + Model.ID + "_" + role_group.BaseRoleID;
+                                            string grouped_role_add_button_id = "ROLEGROUP_GROUPED_ROLE_ADD_BUTTON_" + Model.ID + "_" + role_group.BaseRoleID;
+                                            string rejected_role_add_button_id = "ROLEGROUP_REJECTED_ROLE_ADD_BUTTON_" + Model.ID + "_" + role_group.BaseRoleID;
+                                            string required_role_add_button_id = "ROLEGROUP_REQUIRED_ROLE_ADD_BUTTON_" + Model.ID + "_" + role_group.BaseRoleID;
+                                            string grouped_role_add_button_container_id = "ROLEGROUP_GROUPED_ROLE_ADD_BUTTON_CONTAINER_" + Model.ID + "_" + role_group.BaseRoleID;
+                                            string rejected_role_add_button_container_id = "ROLEGROUP_REJECTED_ROLE_ADD_BUTTON_CONTAINER_" + Model.ID + "_" + role_group.BaseRoleID;
+                                            string required_role_add_button_container_id = "ROLEGROUP_REQUIRED_ROLE_ADD_BUTTON_CONTAINER_" + Model.ID + "_" + role_group.BaseRoleID;
+                                            string base_color = Model.Roles[role_group.BaseRoleID].Color;
+                                            string allowed_group_roles = "";
+                                            foreach (string allowed_group_role_id in role_group.AllowedGroupRoleIDs)
+                                            {
+                                                allowed_group_roles += allowed_group_role_id + "_";
+                                            }
+                                            if (allowed_group_roles != "") { allowed_group_roles = allowed_group_roles.Substring(0, allowed_group_roles.Length - 1); }
+                                            string allowed_rejected_roles = "";
+                                            foreach (string allowed_rejected_role_id in role_group.AllowedRejectedRoleIDs)
+                                            {
+                                                allowed_rejected_roles += allowed_rejected_role_id + "_";
+                                            }
+                                            if (allowed_rejected_roles != "") { allowed_rejected_roles = allowed_rejected_roles.Substring(0, allowed_rejected_roles.Length - 1); }
+                                            string allowed_required_roles = "";
+                                            foreach (string allowed_required_role_id in role_group.AllowedRequiredRoleIDs)
+                                            {
+                                                allowed_required_roles += allowed_required_role_id + "_";
+                                            }
+                                            if (allowed_required_roles != "") { allowed_required_roles = allowed_required_roles.Substring(0, allowed_required_roles.Length - 1); }
+                                            if (base_color == "#0") { base_color = "#BCBCBC"; }
+                                            string grouped_data = "rolegroup_grouped_" + Model.UserID + "_" + role_group.BaseRoleID;
+                                            string rejected_data = "rolegroup_rejected_" + Model.UserID + "_" + role_group.BaseRoleID;
+                                            string required_data = "rolegroup_required_" + Model.UserID + "_" + role_group.BaseRoleID;
+                                            <div id=@group_id style="@group_style" class="role-group-container">
+                                                <div id=@base_role_id class="current-role" style="color:@base_color"><span class="role-name">@Model.Roles[role_group.BaseRoleID].Name</span></div>
+                                                <div id=@grouped_role_add_button_container_id class="role-add-button-container-column">
+                                                    <button id=@grouped_role_add_button_id class="role-add-button-special" type="button" data-roles=@allowed_group_roles data-string=@grouped_data data-container=@grouped_role_add_button_container_id>Grouped Roles +</button>
+                                                    @foreach (string group_role in role_group.GroupedRoleIDs)
+                                                    {
+                                                        if (group_role != "")
+                                                        {
+                                                            string color = Model.Roles[group_role].Color;
+                                                            string position = "order:-" + Model.Roles[group_role].Position.ToString();
+                                                            string style = "color:" + color + "; " + position;
+                                                            string role_id = "ROLEGROUP_GROUPED_ROLE_" + role_group.BaseRoleID + "_" + group_role;
+                                                            string delete_id = "ROLEGROUP_GROUPED_ROLE_DELETE_" + role_group.BaseRoleID + "_" + group_role;
+                                                            string data_string = "rolegroup_grouped_" + Model.UserID + "_" + Model.ID + "_" + role_group.BaseRoleID + "_" + group_role;
+                                                            if (color == "#0") { color = "#BCBCBC"; }
+                                                            <div id=@role_id class="current-role" style="@style"><button id=@delete_id type="button" class="role-remove-button" style="background-color:@color" data-string=@data_string>X</button><span class="role-name">@Model.Roles[group_role].Name</span></div>
+                                                        }
+                                                    }
+                                                </div>
+                                                <div id=@rejected_role_add_button_container_id class="role-add-button-container-column">
+                                                    <button id=@rejected_role_add_button_id class="role-add-button-special" type="button" data-roles=@allowed_rejected_roles data-string=@rejected_data data-container=@rejected_role_add_button_container_id>Rejected Roles +</button>
+                                                    @foreach (string rejected_role in role_group.RejectedRoleIDs)
+                                                    {
+                                                        if (rejected_role != "")
+                                                        {
+                                                            string color = Model.Roles[rejected_role].Color;
+                                                            string position = "order:-" + Model.Roles[rejected_role].Position.ToString();
+                                                            string style = "color:" + color + "; " + position;
+                                                            string role_id = "ROLEGROUP_REJECTED_ROLE_" + role_group.BaseRoleID + "_" + rejected_role;
+                                                            string delete_id = "ROLEGROUP_REJECTED_ROLE_DELETE_" + role_group.BaseRoleID + "_" + rejected_role;
+                                                            string data_string = "rolegroup_rejected_" + Model.UserID + "_" + Model.ID + "_" + role_group.BaseRoleID + "_" + rejected_role;
+                                                            if (color == "#0") { color = "#BCBCBC"; }
+                                                            <div id=@role_id class="current-role" style="@style"><button id=@delete_id type="button" class="role-remove-button" style="background-color:@color" data-string=@data_string>X</button><span class="role-name">@Model.Roles[rejected_role].Name</span></div>
+                                                        }
+                                                    }
+                                                </div>
+                                                <div id=@required_role_add_button_container_id class="role-add-button-container-column">
+                                                    <button id=@required_role_add_button_id class="role-add-button-special" type="button" data-roles=@allowed_required_roles data-string=@required_data data-container=@required_role_add_button_container_id>Required Roles +</button>
+                                                    @foreach (string required_role in role_group.RequiredRoleIDs)
+                                                    {
+                                                        if (required_role != "")
+                                                        {
+                                                            string color = Model.Roles[required_role].Color;
+                                                            string position = "order:-" + Model.Roles[required_role].Position.ToString();
+                                                            string style = "color:" + color + "; " + position;
+                                                            string role_id = "ROLEGROUP_REQUIRED_ROLE_" + role_group.BaseRoleID + "_" + required_role;
+                                                            string delete_id = "ROLEGROUP_REQUIRED_ROLE_DELETE_" + role_group.BaseRoleID + "_" + required_role;
+                                                            string data_string = "rolegroup_required_" + Model.UserID + "_" + Model.ID + "_" + role_group.BaseRoleID + "_" + required_role;
+                                                            if (color == "#0") { color = "#BCBCBC"; }
+                                                            <div id=@role_id class="current-role" style="@style"><button id=@delete_id type="button" class="role-remove-button" style="background-color:@color" data-string=@data_string>X</button><span class="role-name">@Model.Roles[required_role].Name</span></div>
+                                                        }
+                                                    }
+                                                </div>
+                                                <span class="require-all">Require All: @Html.CheckBoxFor(m => m.RoleGroups[role_group.BaseRoleID].RequireAll)</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                break;
+                            case "Linkup":
+                                string linkup_broadcastrole_data = "linkup_broadcastrole_" + Model.UserID + "_";
+                                string linkup_commandrole_data = "linkup_commandrole_" + Model.UserID + "_";
+                                string basic_linkup_id = "WIZARD_LINKUP_" + Model.ID + "_BASIC";
+                                string linkup_channel_id = "LINKUP_CHANNEL_" + Model.ID + "_" + Model.ServerLinkupData.LinkupChannelID;
+                                string linkup_webhook_id = "LINKUP_WEBHOOK_" + Model.ID + "_" + Model.ServerLinkupData.LinkupWebhookID;
+                                string premium_channel_id = "PREMIUM_CHANNEL_" + Model.ID + "_" + Model.ServerLinkupData.PremiumLinkupChannelID;
+                                string premium_webhook_id = "PREMIUM_WEBHOOK_" + Model.ID + "_" + Model.ServerLinkupData.PremiumLinkupWebhookID;
+                                string premium_linkup_id = "WIZARD_LINKUP_" + Model.ID + "_PREMIUM";
+                                bool basic_create_disabled;
+                                bool premium_create_disabled;
+                                if (Model.ServerLinkupData.LinkupChannelID == "") { basic_create_disabled = false; }
+                                else { basic_create_disabled = true; }
+                                if (Model.ServerLinkupData.PremiumLinkupChannelID == "") { premium_create_disabled = false; }
+                                else { premium_create_disabled = true; }
+                                bool basic_delete_disabled = !basic_create_disabled;
+                                bool premium_delete_disabled = !premium_create_disabled;
+                                <div id="LINKUP_PLUGIN_CONTAINER" class="plugin-content-container">
+                                    <div class="plugin-info-and-actions">
+                                        <div class="action-content-container">
+                                            <span class="action-content">The Wizard Linkup channel can be used to create a cross-server connection with your friends. Allows server ID only.</span>
+                                            <span class="action-content">Pemium Servers get the option to have more links or a second channel. Or both.</span>
+                                            <span class="action-content">Broadcast roles are roles that will have their messages sent through the open links.</span>
+                                        </div>
+                                        <div class="create-delete-button-container">
+                                            <button id="BASIC_LINKUP_CHANNEL_CREATE_BUTTON" class="channel-create-button" type="button" disabled=@basic_create_disabled data-user=@Model.UserID>Create Linkup Channel</button>
+                                            <button id="BASIC_LINKUP_CHANNEL_DELETE_BUTTON" class="channel-delete-button" type="button" disabled=@basic_delete_disabled data-user=@Model.UserID>Delete Linkup Channel</button>
+                                        </div>
+                                        <div class="create-delete-button-container">
+                                            <button id="PREMIUM_LINKUP_CHANNEL_CREATE_BUTTON" class="channel-create-button" type="button" disabled=@premium_create_disabled data-user=@Model.UserID>Create Premium Channel</button>
+                                            <button id="PREMIUM_LINKUP_CHANNEL_DELETE_BUTTON" class="channel-delete-button" type="button" disabled=@premium_delete_disabled data-user=@Model.UserID>Delete Premium Channel</button>
+                                        </div>
+                                    </div>
+                                    <span class="text-label">Linkup Broadcast Roles: </span>
+                                    <div id="LINKUP_BROADCASTROLE_CONTAINER" class="role-add-container">
+                                        @foreach (string linkup_role in Model.AccessSettings.LinkupRoles)
+                                        {
+                                            if (linkup_role != "")
+                                            {
+                                                string color = Model.Roles[linkup_role].Color;
+                                                string position = "order:-" + Model.Roles[linkup_role].Position.ToString();
+                                                string style = "color:" + color + "; " + position;
+                                                string linkup_id = "LINKUP_BROADCASTROLE_ROLE_" + linkup_role;
+                                                string delete_id = "LINKUP_BROADCASTROLE_ROLE_DELETE_" + linkup_role;
+                                                string data_string = "linkup_broadcastrole_" + Model.UserID + "_" + Model.ID + "_" + linkup_role + "" + Model.UserID;
+                                                <div id=@linkup_id class="current-role" style="@style"><button id=@delete_id type="button" class="role-remove-button" style="background-color:@color" data-string=@data_string>X</button><span class="role-name">@Model.Roles[linkup_role].Name</span></div>
+                                            }
+                                        }
+                                        <button id="LINKUP_BROADCASTROLE_ADD" class="role-add-button" type="button" data-string=@linkup_broadcastrole_data data-container="LINKUP_BROADCASTROLE_CONTAINER">+</button>
+                                    </div>
+                                    <span class="text-label">Linkup Broadcast Users: </span>
+                                    <div id="LINKUP_USER_CONTAINER" class="channel-add-container">
+                                        @foreach (string linkup_user in Model.AccessSettings.LinkupUsers)
+                                        {
+                                            if (linkup_user != "")
+                                            {
+                                                string linkup_user_id = "SETTINGS_REJECTED_USER_" + linkup_user;
+                                                <div id=@linkup_user_id class="role-add-container"><span class="current-channel">UserID: @linkup_user</span></div>
+                                            }
+                                            else
+                                            {
+                                                <span>There are no allowed Wizard Linkup users</span>
+                                            }
+                                        }
+                                    </div>
+                                    <div id="LINKUP_CONTENT_CONTAINER" class="linkup-info-container">
+                                        <div id="BASIC_LINKUP_CONTAINER" class="linkup-content-container">
+                                            <span class="text-label">Basic Linkup: </span>
+                                            <div class="linkup-channel-container">
+                                                <div class="current-channel">
+                                                    @if (Model.ServerLinkupData.LinkupChannelID != "")
+                                                    {<span id=@linkup_channel_id class="channel-name">#@Model.Channels[Model.ServerLinkupData.LinkupChannelID].Name</span>}
+                                                else
+                                                {<span>No Linkup Channel</span>}
+                                                </div>
+                                                <div id=@linkup_webhook_id class="current-channel">
+                                                    @if (Model.ServerLinkupData.LinkupChannelID != "")
+                                                    {<span id=@linkup_channel_id class="channel-name">Webhook ID: @Model.ServerLinkupData.LinkupWebhookID</span>}
+                                                else
+                                                {<span>No Linkup Webhook</span>}
+                                                </div>
+                                            </div>
+                                            <div class="linkup-connection-container">
+                                                @foreach (ServerData linkup_connection in Model.ServerLinkupData.LinkupConnections.Values)
+                                                {
+                                                    string linkup_icon = "https://cdn.discordapp.com/icons/" + linkup_connection.ID + "/" + linkup_connection.Icon + ".png";
+                                                    <div class="linkup-connection"><img src=@linkup_icon class="server-nav-image" /><span class="channel-name"> @linkup_connection.Name</span></div>
+                                                }
+                                            </div>
+                                        </div>
+                                        @if (Model.ServerLinkupData.PremiumLinkupChannelID != "")
+                                        {
+                                            <div id="PREMIUM_LINKUP_CONTAINER" class="linkup-content-container">
+                                                <span class="text-label">Premium Linkup: </span>
+                                                <div class="linkup-channel-container"><div class="current-channel"><span id=@premium_channel_id class="channel-name">#@Model.Channels[Model.ServerLinkupData.PremiumLinkupChannelID].Name</span></div><div id=@premium_webhook_id class="current-channel"><span class="channel-name">Webhook ID: @Model.ServerLinkupData.PremiumLinkupWebhookID</span></div></div>
+                                                <div class="linkup-connection-container-column">
+                                                    @foreach (ServerData premium_connection in Model.ServerLinkupData.PremiumConnections.Values)
+                                                    {
+                                                        string premium_icon = "https://cdn.discordapp.com/icons/" + premium_connection.ID + "/" + premium_connection.Icon + ".png";
+                                                        <div class="linkup-connection"><img src=@premium_icon class="server-nav-image" /><span class="channel-name"> @premium_connection.Name</span></div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    <span class="text-label">Linkup Command Roles: </span>
+                                    <div id="LINKUP_COMMANDROLE_CONTAINER" class="role-add-container">
+                                        @foreach (string commandrole_role in plugin_content.CommandRoles)
+                                        {
+                                            if (commandrole_role != "")
+                                            {
+                                                string color = Model.Roles[commandrole_role].Color;
+                                                string position = "order:-" + Model.Roles[commandrole_role].Position.ToString();
+                                                string style = "color:" + color + "; " + position;
+                                                string linkup_id = "LINKUP_COMMANDROLE_ROLE_" + commandrole_role;
+                                                string delete_id = "LINKUP_COMMANDROLE_ROLE_DELETE_" + commandrole_role;
+                                                string data_string = "linkup_commandrole_" + Model.UserID + "_" + Model.ID + "_" + commandrole_role;
+                                                <div id=@linkup_id class="current-role" style="@style"><button id=@delete_id type="button" class="role-remove-button" style="background-color:@color" data-string=@data_string>X</button><span class="role-name">@Model.Roles[commandrole_role].Name</span></div>
+                                            }
+                                        }
+                                        <button id="LINKUP_COMMAND_ROLE_ADD_BUTTON" class="role-add-button" type="button" data-string=@linkup_commandrole_data data-container="LINKUP_COMMANDROLE_CONTAINER">+</button>
+                                    </div>
+                                    <span class="text-label">Linkup Commands: </span>
+                                    <div id="LINKUP_COMMANDS_CONTAINER" class="plugin-command-container">
+                                        @foreach (PluginCommand command in plugin_content.Commands)
+                                        {
+                                            <div class="plugin-command">
+                                                <span class="command-field">@command.Name</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                break;
+                            case "Moderator":
+                                //Add the content for the tab here
+                                string moderator_commandrole_data = "moderator_commandrole_" + Model.UserID + "_";
+                                bool lockout_create_disabled = true;
+                                if (Model.ModerationSettings.LockoutChannelID == "") { lockout_create_disabled = false; }
+                                <div class="plugin-content-container">
+                                    <div class="plugin-info-and-actions">
+                                        <div class="action-content-container">
+                                            <span class="action-content">Lockout Channel will be used as the only channel left in the server for a locked out member to have as a private conference room.</span>
+                                            <span class="action-content">Lockout Channel comes with message history removed by default for other members</span>
+                                            <span class="action-content">Lockout Role will be Created on first use of the Lockout Command</span>
+                                        </div>
+                                    </div>
+                                    <span class="text-label">Lockout Info: </span>
+                                    <div class="channel-add-container">
+                                        <div class="current-channel">
+                                            @if (Model.ModerationSettings.LockoutChannelID != "")
+                                            {<span id="lockout-channel" class="channel-name">@Model.Channels[Model.ModerationSettings.LockoutChannelID].Name</span>}
+                                        else
+                                        {<span id="lockout-channel" class="channel-name">No Lockout Channel</span>}
+                                        </div>
+                                        <div class="current-role">
+                                            @if (Model.ModerationSettings.LockoutRoleID != "")
+                                            {<span id="lockout-role" class="role-name">@Model.Roles[Model.ModerationSettings.LockoutRoleID].Name</span>}
+                                        else
+                                        {<span id="lockout-role" class="role-name">No Lockout Role</span>}
+                                        </div>
+                                    </div>
+                                    <span class="text-label">Muted Role: </span>
+                                    <div class="role-add-container">
+                                        <div class="current-role">
+                                            @if (Model.ModerationSettings.MutedRoleID != "")
+                                            {<span id="muted-role" class="role-name">@Model.Roles[Model.ModerationSettings.MutedRoleID].Name</span>}
+                                        else
+                                        {<span id="muted-role" class="role-name">No Muted Role</span>}
+                                        </div>
+                                    </div>
+                                    <span class="text-label">Moderator Command Roles: </span>
+                                    <div id="MODERATOR_COMMANDROLE_CONTAINER" class="role-add-container">
+                                        @foreach (string commandrole_role in plugin_content.CommandRoles)
+                                        {
+                                            if (commandrole_role != "")
+                                            {
+                                                string color = Model.Roles[commandrole_role].Color;
+                                                string position = "order:-" + Model.Roles[commandrole_role].Position.ToString();
+                                                string style = "color:" + color + "; " + position;
+                                                string moderator_id = "MODERATOR_COMMANDROLE_ROLE_" + commandrole_role;
+                                                string delete_id = "MODERATOR_COMMANDROLE_ROLE_DELETE_" + commandrole_role;
+                                                string data_string = "moderator_commandrole_" + Model.UserID + "_" + Model.ID + "_" + commandrole_role;
+                                                <div id=@moderator_id class="current-role" style="@style"><button id=@delete_id type="button" class="role-remove-button" style="background-color:@color" data-string=@data_string>X</button><span class="role-name">@Model.Roles[commandrole_role].Name</span></div>
+                                            }
+                                        }
+                                        <button id="MODERATOR_COMMANDROLE_ADD_BUTTON" class="role-add-button" type="button" data-string=@moderator_commandrole_data data-container="MODERATOR_COMMANDROLE_CONTAINER">+</button>
+                                    </div>
+                                    <span class="text-label">Moderator Commands: </span>
+                                    <div id="MODERATOR_COMMANDS_CONTAINER" class="plugin-command-container">
+                                        @foreach (PluginCommand command in plugin_content.Commands)
+                                        {
+                                            <div class="plugin-command">
+                                                <span class="command-field">@command.Name</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                break;
+                            case "Verify":
+                                bool verify_create_disabled = true;
+                                if (Model.Verification.VerifyChannelID == "") { verify_create_disabled = false; }
+                                <div class="plugin-content-container">
+                                    <div class="plugin-info-and-actions">
+                                        Select or create a Verification channel here.
+                                        <button id="VERIFY_CHANNEL_CREATE_BUTTON" class="channel-create-button" type="button" disabled=@verify_create_disabled data-user=@Model.UserID>Create Verify Channel</button>
+                                        Modify the roles
+                                    </div>
+                                    <span class="text-label">Verify Channel: </span>
+                                    <div class="channel-add-container">
+                                        @if (Model.Channels.ContainsKey(Model.Verification.VerifyChannelID))
+                                        {
+                                            <div class="current-channel"><span id="verify-channel" class="channel-name">#@Model.Channels[Model.Verification.VerifyChannelID].Name</span></div>
+                                            if (@Model.Verification.VerifyMessageID != "")
+                                            {<div class="current-channel"><span id="verify-message" class="channel-name">Message ID: @Model.Verification.VerifyMessageID</span></div>}
+                                    }
+                                    </div>
+                                    <span class="text-label">Verify Role: </span>
+                                    <div class="role-add-container">
+                                        @if (Model.Roles.ContainsKey(Model.Verification.VerifyRoleID))
+                                        {<div class="current-role"><button type="button" class="role-remove-button">X</button><span class="role-name">@Model.Roles[Model.Verification.VerifyRoleID].Name</span></div>}
+                                    </div>
+                                    <span class="text-label">Member Role: </span>
+                                    <div class="role-add-container">
+                                        @if (Model.Roles.ContainsKey(Model.Verification.MemberRoleID))
+                                        {<div class="current-role"><button type="button" class="role-remove-button">X</button><span class="role-name">@Model.Roles[Model.Verification.MemberRoleID].Name</span></div>}
+                                    </div>
+                                    <span class="text-label">Message Text: </span>
+                                    <div id="verify-message-text">@Model.Verification.VerifyMessageText</div>
+                                </div>
+                                break;
+                        }
+                    </div>
+                    }
+                }
+            }
+        }
+    </div>
+</div>

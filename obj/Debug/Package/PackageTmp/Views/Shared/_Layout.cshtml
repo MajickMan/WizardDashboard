@@ -1,0 +1,49 @@
+﻿@using WizardDashboard.Models
+@model DashboardServer
+<!DOCTYPE html>
+<html>
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - My ASP.NET Application</title>
+    <style>
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #262637;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #181823;
+        }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: #080813;
+            }
+    </style>
+    @Styles.Render("~/Styles/css")
+</head>
+<body>
+    <div class="majick-box-outer">
+        <div class="majick-navigation">
+            <span class="majick-nav-menu">
+                <span class="majick-navigation-item">@Html.ActionLink("Home", "Index", "Home")</span>
+                <span class="majick-navigation-item">@Html.ActionLink("Premium", "Premium", "Dashboard")</span>
+                <span class="majick-navigation-item">@Html.ActionLink("Dashboard", "Servers", "Dashboard")</span>
+            </span>
+        </div>
+        <div class="majick-box-inner majick-theme">
+            @RenderBody()
+            <hr />
+            <footer>
+                <p><span id="siteseal"><script async type="text/javascript" src="https://seal.godaddy.com/getSeal?sealID=QCbNYCuvEHHSNyKMKEQj8JZjUzU19cizbeHZRl4ekSdnmyUGh5IgM9de3a3p"></script></span>   &copy; @DateTime.Now.Year - MysteriousMajick  |  Styled By: Davien#2990</p>
+            </footer>
+        </div>
+    </div>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/MajickJS")
+    @RenderSection("scripts", required: false)
+</body>
+</html>
